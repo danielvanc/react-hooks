@@ -3,9 +3,12 @@
 
 import * as React from 'react'
 
-function Greeting({initialName = ''}) {
+function Greeting({ initialName = '' }) {
+  function lazyInit() {
+    return window.localStorage.getItem('name') || initialName
+  }
   const [name, setName] = React.useState(
-    window.localStorage.getItem('name') || initialName,
+    lazyInit()
   )
 
   React.useEffect(() => {
