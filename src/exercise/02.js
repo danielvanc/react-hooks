@@ -3,15 +3,33 @@
 
 import * as React from 'react'
 
-function useLocalStorageState(key, defaultValue) {
+function useLocalStorageState(
+  key,
+  defaultValue,
+  {serialize = JSON.stringify, deserialize = JSON.parse} = {},
+) {
   function lazyInit() {
-    return window.localStorage.getItem(key) || defaultValue
+    const valueInLocalStorage = window.localStorage.getItem(key)
+    if (valueInLocalStorage) {
+      return deserialize(valueInLocalStorage)
+    }
+    return typeof defaultValue === 'function' ? defaultValue() : defaultValue
   }
   const [state, setState] = React.useState(lazyInit)
 
+  // Create this so that we can modify the current key obj
+  // without triggering a re-render.
+  const prevKeyRef = React.useRef(key)
+
   React.useEffect(() => {
-    window.localStorage.setItem(key, state)
-  }, [key, state])
+    const prevKey = prevKeyRef.current
+    // If the key changes between renders, remove item
+    if (prevKey !== key) {
+      window.localStorage.removeItem(prevKey)
+    }
+    prevKeyRef.current = key
+    window.localStorage.setItem(key, serialize(state))
+  }, [key, serialize, state])
 
   return [state, setState]
 }
