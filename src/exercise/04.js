@@ -2,22 +2,12 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import * as React from 'react'
-
+import { useLocalStorageState } from '../utils'
 const initialSquares = Array(9).fill(null);
 
 function Board() {
 
-  // Instead of JSON parsing on every refresh (expensive), do a lazy 
-  // callback in useState
-  const [squares, setSquares] = React.useState(
-    () => JSON.parse(localStorage.getItem("squares")) || initialSquares
-  )
-
-  // Use useeffect because setting
-  // localStorage is a SideEffect
-  React.useEffect(() => {
-    localStorage.setItem("squares", JSON.stringify(squares))
-  }, [squares])
+  const [squares, setSquares] = useLocalStorageState('squares', initialSquares)
 
   const nextValue = calculateNextValue(squares);
   const winner = calculateWinner(squares);
