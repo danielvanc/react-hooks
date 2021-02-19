@@ -6,25 +6,29 @@ import {fetchPokemon, PokemonInfoFallback, PokemonDataView} from '../pokemon'
 
 import {PokemonForm} from '../pokemon'
 
+// function useStateCombined() {
+// }
+
 function PokemonInfo({pokemonName}) {
-  const [pokemon, setPokemon] = React.useState(null)
-  const [error, setError] = React.useState(false)
-  const [status, setStatus] = React.useState('idle')
+  const [{status, pokemon, error}, setState] = React.useState({
+    status: 'idle',
+    pokemon: null,
+    error: null,
+  })
 
   React.useEffect(() => {
-    if (!pokemonName) return setStatus('idle')
-    // Reset state so that we get the loading screen eacch time
-    // setPokemon(null)
-    // setError(false)
-    setStatus('pending')
+    if (!pokemonName) return
+
+    // Use object with it's status together.
+    // That way, there's no render issues because
+    // 1 state is being set before another.
+    setState({status: 'pending'})
     fetchPokemon(pokemonName)
-      .then(pokemonData => {
-        setPokemon(pokemonData)
-        setStatus('resolved')
+      .then(pokemon => {
+        setState({pokemon, status: 'resolved'})
       })
       .catch(error => {
-        setError(error)
-        setStatus('rejected')
+        setState({error, status: 'rejected'})
       })
   }, [pokemonName])
 
